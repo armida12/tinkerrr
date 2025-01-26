@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Body Styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      text-align: center;
+      padding: 30px;
+    }
+
+    /* Header Styling */
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      color: #4CAF50;
+    }
+
+    /* Main Test Area Styling */
+    .test-area {
+      margin: 20px auto;
+      max-width: 600px;
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Displaying the sentence */
+    .words {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #e0e0e0;
+      word-wrap: break-word;
+    }
+
+    .words span.correct {
+      color: #66bb6a;
+    }
+
+    .words span.incorrect {
+      color: #ff5252;
+    }
+
+    /* Input Area Styling */
+    .input-area {
+      width: 100%;
+      padding: 12px;
+      font-size: 20px;
+      border: 2px solid #4CAF50;
+      background-color: transparent;
+      color: #ffffff;
+      border-radius: 5px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-area:focus {
+      border-color: #66bb6a;
+    }
+
+    /* Timer and Stats Styling */
+    .stats, .timer {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 10px;
+      width: 100%;
+      background-color: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0;
+      background-color: #4CAF50;
+      transition: width 0.3s ease;
+    }
+
+    /* Button Styling */
+    button {
+      margin-top: 20px;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    button:active {
+      background-color: #388e3c;
+    }
+
+    /* Responsive Layout */
+    @media (max-width: 600px) {
+      .words {
+        font-size: 22px;
+      }
+
+      .input-area {
+        font-size: 18px;
+      }
+
+      .stats, .timer {
+        font-size: 18px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 12px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Typing Speed Test</h1>
+  <div class="test-area">
+    <div class="words" id="words"></div>
+    <input type="text" id="input" class="input-area" placeholder="Start typing..." oninput="checkTyping()" />
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progress-bar-fill"></div>
+    </div>
+    <div class="timer" id="timer">Time Left: 10 seconds</div>
+    <div class="stats" id="stats"></div>
+    <button onclick="startNewTest()">Start New Test</button>
+  </div>
+  <script>
+    const sentences = [
+      "The quick brown fox jumps over the lazy dog.",
+      "Coding is both an art and a science.",
+      "Practice typing to improve your speed and accuracy.",
+      "JavaScript is a versatile programming language.",
+      "Innovation distinguishes between a leader and a follower."
+    ];
+    let currentSentence = "";
+    let startTime = null;
+    let timerInterval;
+    let timeLeft = 10;
+
+    const wordsDiv = document.getElementById("words");
+    const input = document.getElementById("input");
+    const statsDiv = document.getElementById("stats");
+    const timerDiv = document.getElementById("timer");
+    const progressBarFill = document.getElementById("progress-bar-fill");
+
+    function startNewTest() {
+      // Reset values
+      currentSentence = sentences[Math.floor(Math.random() * sentences.length)];
+      wordsDiv.innerHTML = currentSentence.split("").map(letter => `<span>${letter}</span>`).join("");
+      input.value = "";
+      statsDiv.textContent = "";
+      timerDiv.textContent = "Time Left: 10 seconds";
+      progressBarFill.style.width = "0%";
+      startTime = null;
+      timeLeft = 10;
+      input.disabled = false;
+      input.focus();
+
+      // Start the timer
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+      timeLeft -= 1;
+      timerDiv.textContent = `Time Left: ${timeLeft} seconds`;
+      progressBarFill.style.width = `${((10 - timeLeft) / 10) * 100}%`;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        endTest();
+      }
+    }
+
+    function checkTyping() {
+      if (!startTime) startTime = new Date();
+      const typedText = input.value;
+      const sentenceChars = wordsDiv.querySelectorAll("span");
+
+      sentenceChars.forEach((charSpan, index) => {
+        if (typedText[index] == null) {
+          charSpan.classList.remove("correct", "incorrect");
+        } else if (typedText[index] === charSpan.textContent) {
+          charSpan.classList.add("correct");
+          charSpan.classList.remove("incorrect");
+        } else {
+          charSpan.classList.add("incorrect");
+          charSpan.classList.remove("correct");
+        }
+      });
+
+      if (typedText === currentSentence) {
+        clearInterval(timerInterval);
+        endTest();
+      }
+    }
+
+    function endTest() {
+      input.disabled = true;
+      const timeTaken = startTime ? (new Date() - startTime) / 1000 : 10; // Default to full time if no input
+      const words = currentSentence.split(" ").length;
+      const wpm = Math.round((words / timeTaken) * 60);
+
+      statsDiv.innerHTML = `
+        <p>WPM: ${wpm}</p>
+      `;
+    }
+
+    // Start the first test
+    startNewTest();
+  </script>
+</body>
+</html>
